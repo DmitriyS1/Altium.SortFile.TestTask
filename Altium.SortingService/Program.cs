@@ -3,4 +3,4 @@ using Altium.SortingService;
 
 Console.WriteLine("Hello, World!");
 var splitter = new Splitter();
-Console.WriteLine(splitter.WorkingFileName());
+await splitter.WorkingFileName();
