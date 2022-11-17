@@ -56,6 +56,23 @@ namespace Altium.SortingService
             return currentFileNumber;
         }
 
+        private async Task MergeSortedFiles(string path1, string path2)
+        {
+            var name1 = path1.Split('/').Last().Split('.')[0];
+            var name2 = path2.Split('/').Last().Split('.')[0];
+
+            using var firstFileStream = File.OpenText(path1);
+            using var secondFileStream = File.OpenText(path2);
+
+            using var resultFile = File.OpenWrite($"{FILE_DIRECTORY}/{name1}-{name2}.txt");
+            var currentLine1 = JsonSerializer.Deserialize<Line>(firstFileStream.ReadLine());
+            var currentLine2 = JsonSerializer.Deserialize<Line>(second FileStream.ReadLine());
+            while(!secondFileStream.EndOfStream && !firstFileStream.EndOfStream)
+            {
+                if
+            }
+        }
+
         private Line ParseData(string line)
         {
             var lineParts = line.Split('.');
