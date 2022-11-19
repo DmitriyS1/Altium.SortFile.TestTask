@@ -1,6 +1,7 @@
 ﻿using Altium.SortingService.Models;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace Altium.SortingService
 {
@@ -12,21 +13,21 @@ namespace Altium.SortingService
 
         public async Task WorkingFileName()
         {
-            //var fileName = GetLastFileName();
+            var fileName = GetLastFileName();
 
-            //var countOfUnsorted = await SplitFile(fileName);
+            var countOfUnsorted = await SplitFile(fileName);
 
-            //for (int i = 0; i < countOfUnsorted; i++)
-            //{
-            //    var unsortedFilePath = $"{FILE_DIRECTORY}/{UNSORTED}-{i}.json";
-            //    var sortedArray = await SortFile(unsortedFilePath);
-            //    await WriteAndSerializeArray(sortedArray, i, true);
-            //    File.Delete(unsortedFilePath);
-            //}
+            for (int i = 0; i < countOfUnsorted; i++)
+            {
+                var unsortedFilePath = $"{FILE_DIRECTORY}/{UNSORTED}-{i}.json";
+                var sortedArray = await SortFile(unsortedFilePath);
+                await WriteAndSerializeArray(sortedArray, i, true);
+                File.Delete(unsortedFilePath);
+            }
 
             var filesToMerge = GetSortedFileNames();
             var resultName = "";
-            while(filesToMerge.Count > 1)
+            while(filesToMerge.Count > 2)
             {
                 var firstName = $"{FILE_DIRECTORY}/{filesToMerge.Dequeue()}";
                 var secondName = $"{FILE_DIRECTORY}/{filesToMerge.Dequeue()}";
@@ -38,6 +39,14 @@ namespace Altium.SortingService
 
                 filesToMerge.Enqueue($"{FILE_DIRECTORY}/{resultName}");
             }
+
+            var firstName1 = $"{FILE_DIRECTORY}/{filesToMerge.Dequeue()}";
+            var secondName1 = $"{FILE_DIRECTORY}/{filesToMerge.Dequeue()}";
+
+            resultName = await FinalMerge(firstName1, secondName1, fileName);
+
+            File.Delete(firstName1);
+            File.Delete(secondName1);
         }
 
         /// <summary>
@@ -119,6 +128,39 @@ namespace Altium.SortingService
             return resultFileName; 
         }
 
+        private async Task<string> FinalMerge(string path1, string path2, string finalName)
+        {
+            using var firstFileStream = File.OpenText(path1);
+            using var secondFileStream = File.OpenText(path2);
+
+            var resultFileName = $"{FILE_DIRECTORY}/{finalName}-sorted.txt";
+            using var resultFile = new StreamWriter(resultFileName);
+            var currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
+            var currentLine2 = JsonSerializer.Deserialize<Line>(await secondFileStream.ReadLineAsync());
+            while (!secondFileStream.EndOfStream && !firstFileStream.EndOfStream)
+            {
+                var compareRes = currentLine1.CompareTo(currentLine2);
+                if (compareRes < 0)
+                {
+                    await resultFile.WriteLineAsync($"{currentLine1.SerialNumber}. {currentLine1.CompanyName}");
+                    if (!firstFileStream.EndOfStream)
+                    {
+                        currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
+                    }
+                }
+                else
+                {
+                    await resultFile.WriteLineAsync($"{currentLine2.SerialNumber}. {currentLine2.CompanyName}");
+                    if (!secondFileStream.EndOfStream)
+                    {
+                        currentLine2 = JsonSerializer.Deserialize<Line>(await secondFileStream.ReadLineAsync());
+                    }
+                }
+            }
+
+            return resultFileName;
+        }
+
         private Line ParseData(string line)
         {
             var lineParts = line.Split('.');
@@ -139,8 +181,8 @@ namespace Altium.SortingService
 
         private async Task<Line[]> SortFile(string path)
         {
-            var fileContent = await File.ReadAllTextAsync(path);
-            var deserialized = JsonSerializer.Deserialize<Line[]>(fileContent);
+            var fileContent = await File.ReadAllLinesAsync(path);
+            var deserialized = fileContent.Select(x => JsonSerializer.Deserialize<Line>(x)).ToArray();
             Array.Sort(deserialized);
 
             return deserialized;
@@ -149,7 +191,7 @@ namespace Altium.SortingService
         private async Task WriteAndSerializeArray(IEnumerable<Line> lines, int fileNumber, bool isSorted = false)
         {
             var sortedString = isSorted ? SORTED : UNSORTED;
-            await File.WriteAllTextAsync($"{FILE_DIRECTORY}/{sortedString}-{fileNumber}.json", JsonSerializer.Serialize(lines));
+            await File.WriteAllLinesAsync($"{FILE_DIRECTORY}/{sortedString}-{fileNumber}.json", lines.Select(x => JsonSerializer.Serialize(x)));
         }
 
         private string GetLastFileName()
