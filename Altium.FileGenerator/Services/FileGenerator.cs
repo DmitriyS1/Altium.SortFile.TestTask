@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Altium.FileGenerator.Services
+﻿namespace Altium.FileGenerator.Services
 {
     /// <summary>
     /// Generates files
@@ -16,7 +10,8 @@ namespace Altium.FileGenerator.Services
         public string Generate(long size)
         {
             var names = UploadNames(100);
-            using var file = File.CreateText($"file-{size}.txt");
+            var fileName = $"file-{size}.txt";
+            using var file = File.CreateText(fileName);
             while(size >= 0)
             {
                 var number = random.Next(0, 10000);
@@ -27,7 +22,7 @@ namespace Altium.FileGenerator.Services
                 size -= line.Length;
             }
 
-            return $"{Directory.GetCurrentDirectory()}\\file-{size}.txt";
+            return $"{Directory.GetCurrentDirectory()}/{fileName}";
         }
 
         private List<string> UploadNames(int? count = null)

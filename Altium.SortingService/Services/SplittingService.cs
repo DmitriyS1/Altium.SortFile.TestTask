@@ -1,11 +1,6 @@
 ﻿using Altium.SortingService.Models;
 using Altium.SortingService.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Altium.SortingService.Services
 {
@@ -14,8 +9,15 @@ namespace Altium.SortingService.Services
         private readonly string FILE_DIRECTORY; // = "../../../../Altium.FileGenerator/bin/Debug/net6.0";
         private string UNSORTED = "unsorted";
 
-        public SplittingService(string directory)
+        public SplittingService(string directory, string fileName)
         {
+            var isPathValid = File.Exists($"{directory}/{fileName}");
+            if (!isPathValid)
+            {
+                Console.WriteLine("File not found");
+                throw new Exception("FileNotFoundException");
+            }
+
             FILE_DIRECTORY = directory;
         }
 
