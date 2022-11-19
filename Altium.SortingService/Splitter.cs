@@ -12,16 +12,31 @@ namespace Altium.SortingService
 
         public async Task WorkingFileName()
         {
-            var fileName = GetLastFileName();
+            //var fileName = GetLastFileName();
 
-            var countOfUnsorted = await SplitFile(fileName);
+            //var countOfUnsorted = await SplitFile(fileName);
 
-            for (int i = 0; i < countOfUnsorted; i++)
+            //for (int i = 0; i < countOfUnsorted; i++)
+            //{
+            //    var unsortedFilePath = $"{FILE_DIRECTORY}/{UNSORTED}-{i}.json";
+            //    var sortedArray = await SortFile(unsortedFilePath);
+            //    await WriteAndSerializeArray(sortedArray, i, true);
+            //    File.Delete(unsortedFilePath);
+            //}
+
+            var filesToMerge = GetSortedFileNames();
+            var resultName = "";
+            while(filesToMerge.Count > 1)
             {
-                var unsortedFilePath = $"{FILE_DIRECTORY}/{UNSORTED}-{i}.json";
-                var sortedArray = await SortFile(unsortedFilePath);
-                await WriteAndSerializeArray(sortedArray, i, true);
-                File.Delete(unsortedFilePath);
+                var firstName = $"{FILE_DIRECTORY}/{filesToMerge.Dequeue()}";
+                var secondName = $"{FILE_DIRECTORY}/{filesToMerge.Dequeue()}";
+
+                resultName = await MergeSortedFiles(firstName, secondName);
+
+                File.Delete(firstName);
+                File.Delete(secondName);
+
+                filesToMerge.Enqueue($"{FILE_DIRECTORY}/{resultName}");
             }
         }
 
@@ -56,21 +71,52 @@ namespace Altium.SortingService
             return currentFileNumber;
         }
 
-        private async Task MergeSortedFiles(string path1, string path2)
+        private Queue<string> GetSortedFileNames()
         {
-            var name1 = path1.Split('/').Last().Split('.')[0];
-            var name2 = path2.Split('/').Last().Split('.')[0];
+            var directory = new DirectoryInfo(FILE_DIRECTORY);
+
+            // TODO: Create a menu where you can choose from all txt files in directory
+            var myFile = directory.GetFiles()
+                .Where(x => x.Name.Contains("sorted"))
+                .Select(file => file.Name);
+
+            return new Queue<string>(myFile);
+        }
+
+        private async Task<string> MergeSortedFiles(string path1, string path2, string extension = "json")
+        {
+            var name1 = path1.Split('/').Last().Split('.')[0].Split('-').Last(); // sorted-0
+            var name2 = path2.Split('/').Last().Split('.')[0].Split('-').Last(); // sorted-1
 
             using var firstFileStream = File.OpenText(path1);
             using var secondFileStream = File.OpenText(path2);
 
-            using var resultFile = File.OpenWrite($"{FILE_DIRECTORY}/{name1}-{name2}.txt");
-            var currentLine1 = JsonSerializer.Deserialize<Line>(firstFileStream.ReadLine());
-            var currentLine2 = JsonSerializer.Deserialize<Line>(second FileStream.ReadLine());
+            var resultFileName = $"{FILE_DIRECTORY}/merged-{name1}{name2}.{extension}";
+            using var resultFile = new StreamWriter(resultFileName);
+            var currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
+            var currentLine2 = JsonSerializer.Deserialize<Line>(await secondFileStream.ReadLineAsync());
             while(!secondFileStream.EndOfStream && !firstFileStream.EndOfStream)
             {
-                if
+                var compareRes = currentLine1.CompareTo(currentLine2);
+                if (compareRes < 0)
+                {
+                    await resultFile.WriteLineAsync(JsonSerializer.Serialize(currentLine1));
+                    if (!firstFileStream.EndOfStream)
+                    {
+                        currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
+                    }
+                }
+                else
+                {
+                    await resultFile.WriteLineAsync(JsonSerializer.Serialize(currentLine2));
+                    if (!secondFileStream.EndOfStream)
+                    {
+                        currentLine2 = JsonSerializer.Deserialize<Line>(await secondFileStream.ReadLineAsync());
+                    }
+                }
             }
+
+            return resultFileName; 
         }
 
         private Line ParseData(string line)
