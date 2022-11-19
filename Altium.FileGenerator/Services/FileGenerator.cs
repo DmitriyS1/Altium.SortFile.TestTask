@@ -13,7 +13,7 @@ namespace Altium.FileGenerator.Services
     {
         private static readonly Random random = new Random();
 
-        public void Run(long size)
+        public string Generate(long size)
         {
             var names = UploadNames(100);
             using var file = File.CreateText($"file-{size}.txt");
@@ -26,6 +26,8 @@ namespace Altium.FileGenerator.Services
                 file.WriteLine(line);
                 size -= line.Length;
             }
+
+            return $"{Directory.GetCurrentDirectory()}\\file-{size}.txt";
         }
 
         private List<string> UploadNames(int? count = null)

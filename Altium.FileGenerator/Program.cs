@@ -6,4 +6,5 @@ Console.WriteLine("Created file will have next format: \"Number. String\" for ea
 var size = MenuService.GetFileSize();
 
 var fileGenerator = new FileGenerator();
-fileGenerator.Run(size);
+var filePath = fileGenerator.Generate(size);
+Console.WriteLine($"File created under the path: {filePath}");
