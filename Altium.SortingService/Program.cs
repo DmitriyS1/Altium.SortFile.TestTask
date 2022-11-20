@@ -34,20 +34,6 @@ for (var i = 0; i < countOfSplittedFiles; i++)
     sortedFiles.Enqueue($"sorted-{i}.txt");
 }
 
-//var sortingService = new SortingService(countOfSplittedFiles, path);
-
-//// Mesuring Sorting operation
-//var stopwatchSort = new Stopwatch();
-//stopwatchSort.Start();
-
-//var sortedFiles = await sortingService.Sort();
-//// var sortedFiles = sortingService.SortParallel();
-
-//stopwatchSort.Stop();
-//var tsSort = stopwatchSort.Elapsed;
-//Console.WriteLine("Sorting Elapsed Time is {0:00}:{1:00}:{2:00}.{3}",
-//tsSort.Hours, tsSort.Minutes, tsSort.Seconds, tsSort.Milliseconds);
-
 // Mesuring Merging operation
 var mergingService = new MergingService(path);
 var stopwatchMerge = new Stopwatch();
