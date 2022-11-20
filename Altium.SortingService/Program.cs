@@ -15,7 +15,7 @@ while (true)
     {
         fileName = path.Split("/").Last();
         path = path.Substring(0, path.Length - fileName.Length);
-        splittingService = new SplittingService(path, fileName, 200000);
+        splittingService = new SplittingService(path, fileName, 5000000); // 5M -> 390 MB
         break;
     }
     catch (Exception _)
@@ -28,28 +28,33 @@ var stopwatchFull = new Stopwatch();
 stopwatchFull.Start();
 
 var countOfSplittedFiles = await splittingService.SplitFile(fileName);
+var sortedFiles = new Queue<string>();
+for (var i = 0; i < countOfSplittedFiles; i++)
+{
+    sortedFiles.Enqueue($"sorted-{i}.txt");
+}
 
-var sortingService = new SortingService(countOfSplittedFiles, path);
+//var sortingService = new SortingService(countOfSplittedFiles, path);
 
-// Mesuring Sorting operation
-var stopwatchSort = new Stopwatch();
-stopwatchSort.Start();
+//// Mesuring Sorting operation
+//var stopwatchSort = new Stopwatch();
+//stopwatchSort.Start();
 
-// var sortedFiles = await sortingService.Sort();
-var sortedFiles = sortingService.SortParallel();
+//var sortedFiles = await sortingService.Sort();
+//// var sortedFiles = sortingService.SortParallel();
 
-stopwatchSort.Stop();
-var tsSort = stopwatchSort.Elapsed;
-Console.WriteLine("Sorting Elapsed Time is {0:00}:{1:00}:{2:00}.{3}",
-tsSort.Hours, tsSort.Minutes, tsSort.Seconds, tsSort.Milliseconds);
+//stopwatchSort.Stop();
+//var tsSort = stopwatchSort.Elapsed;
+//Console.WriteLine("Sorting Elapsed Time is {0:00}:{1:00}:{2:00}.{3}",
+//tsSort.Hours, tsSort.Minutes, tsSort.Seconds, tsSort.Milliseconds);
 
 // Mesuring Merging operation
 var mergingService = new MergingService(path);
 var stopwatchMerge = new Stopwatch();
 stopwatchMerge.Start();
 
-// var result = await mergingService.Merge(sortedFiles, fileName);
-var result = mergingService.MergeParallel(sortedFiles, fileName);
+var result = await mergingService.Merge(sortedFiles, fileName);
+// var result = mergingService.MergeParallel(sortedFiles, fileName);
 
 stopwatchMerge.Stop();
 var tsMerge = stopwatchMerge.Elapsed;

@@ -8,6 +8,7 @@ namespace Altium.SortingService.Services
     {
         private readonly string _directory;
         private string UNSORTED = "unsorted";
+        private string SORTED = "sorted";
         private readonly int _counter;
 
         /// <summary>
@@ -50,7 +51,8 @@ namespace Altium.SortingService.Services
             {
                 if (counter == _counter)
                 {
-                    await linesBatch.WriteAndSerialize(currentFileNumber++, UNSORTED, _directory);
+                    linesBatch.Sort();
+                    await linesBatch.WriteAndSerialize(currentFileNumber++, SORTED, _directory);
                     counter = 0;
                     linesBatch.Clear();
                 }
@@ -59,7 +61,8 @@ namespace Altium.SortingService.Services
                 counter++;
             }
 
-            await linesBatch.WriteAndSerialize(currentFileNumber++, UNSORTED, _directory);
+            linesBatch.Sort();
+            await linesBatch.WriteAndSerialize(currentFileNumber++, SORTED, _directory);
 
             return currentFileNumber;
         }
