@@ -5,7 +5,12 @@ VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Altium.FileGenerator", "Altium.FileGenerator\Altium.FileGenerator.csproj", "{93499C91-B583-4A53-B3FD-2956F5E7D2DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Altium.SortingService", "Altium.SortingService\Altium.SortingService.csproj", "{60CE6911-2634-4120-8FA0-2C225B9C55AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Altium.SortingService", "Altium.SortingService\Altium.SortingService.csproj", "{60CE6911-2634-4120-8FA0-2C225B9C55AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1FB9E742-8172-474C-9C67-136E2D2D772F}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
