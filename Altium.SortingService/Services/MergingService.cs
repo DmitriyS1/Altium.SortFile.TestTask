@@ -18,24 +18,24 @@ namespace Altium.SortingService.Services
             var resultName = "";
             while (filesToMerge.Count > 2)
             {
-                var firstName = $"{_directory}{filesToMerge.Dequeue()}";
-                var secondName = $"{_directory}{filesToMerge.Dequeue()}";
+                var firstPath = $"{_directory}{filesToMerge.Dequeue()}";
+                var secondPath = $"{_directory}{filesToMerge.Dequeue()}";
 
-                resultName = await MergeSortedFiles(firstName, secondName);
+                resultName = await OnlyOneMergeSortedFiles(firstPath, secondPath, $"merged-{Guid.NewGuid()}.txt");
 
-                File.Delete(firstName);
-                File.Delete(secondName);
+                File.Delete(firstPath);
+                File.Delete(secondPath);
 
                 filesToMerge.Enqueue(resultName);
             }
 
-            var firstName1 = $"{_directory}{filesToMerge.Dequeue()}";
-            var secondName1 = $"{_directory}{filesToMerge.Dequeue()}";
+            string firstPath1 = $"{_directory}{filesToMerge.Dequeue()}";
+            var secondPath1 = $"{_directory}{filesToMerge.Dequeue()}";
 
-            resultName = await FinalMerge(firstName1, secondName1, fileName);
+            resultName = await OnlyOneMergeSortedFiles(firstPath1, secondPath1, $"{fileName}-sorted.txt", false);
 
-            File.Delete(firstName1);
-            File.Delete(secondName1);
+            File.Delete(firstPath1);
+            File.Delete(secondPath1);
 
             return resultName;
         }
@@ -76,12 +76,11 @@ namespace Altium.SortingService.Services
             return resultName;
         }
 
-        private async Task<string> MergeSortedFiles(string path1, string path2)
+        private async Task<string> OnlyOneMergeSortedFiles(string firstPath, string secondPath, string resultFileName, bool isJson = true)
         {
-            using var firstFileStream = File.OpenText(path1);
-            using var secondFileStream = File.OpenText(path2);
+            using var firstFileStream = File.OpenText(firstPath);
+            using var secondFileStream = File.OpenText(secondPath);
 
-            var resultFileName = $"merged-{Guid.NewGuid()}.txt";
             using var resultFile = new StreamWriter($"{_directory}{resultFileName}");
 
             var currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
@@ -92,7 +91,7 @@ namespace Altium.SortingService.Services
                 var compareRes = currentLine1.CompareTo(currentLine2);
                 if (compareRes < 0)
                 {
-                    await resultFile.WriteLineAsync(JsonSerializer.Serialize(currentLine1));
+                    await WriteData(resultFile, currentLine1, isJson);
                     if (!firstFileStream.EndOfStream)
                     {
                         currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
@@ -100,7 +99,7 @@ namespace Altium.SortingService.Services
                 }
                 else
                 {
-                    await resultFile.WriteLineAsync(JsonSerializer.Serialize(currentLine2));
+                    await WriteData(resultFile, currentLine2, isJson);
                     if (!secondFileStream.EndOfStream)
                     {
                         currentLine2 = JsonSerializer.Deserialize<Line>(await secondFileStream.ReadLineAsync());
@@ -111,39 +110,16 @@ namespace Altium.SortingService.Services
             return resultFileName;
         }
 
-        private async Task<string> FinalMerge(string path1, string path2, string finalName)
+        public async Task WriteData(StreamWriter writer, Line data, bool isJson)
         {
-            using var firstFileStream = File.OpenText(path1);
-            using var secondFileStream = File.OpenText(path2);
-
-            var resultFileName = $"{_directory}{finalName}-sorted.txt";
-            using var resultFile = new StreamWriter(resultFileName);
-
-            var currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
-            var currentLine2 = JsonSerializer.Deserialize<Line>(await secondFileStream.ReadLineAsync());
-
-            while (!secondFileStream.EndOfStream && !firstFileStream.EndOfStream)
+            if (isJson)
             {
-                var compareRes = currentLine1.CompareTo(currentLine2);
-                if (compareRes < 0)
-                {
-                    await resultFile.WriteLineAsync($"{currentLine1.SerialNumber}. {currentLine1.CompanyName}");
-                    if (!firstFileStream.EndOfStream)
-                    {
-                        currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
-                    }
-                }
-                else
-                {
-                    await resultFile.WriteLineAsync($"{currentLine2.SerialNumber}. {currentLine2.CompanyName}");
-                    if (!secondFileStream.EndOfStream)
-                    {
-                        currentLine2 = JsonSerializer.Deserialize<Line>(await secondFileStream.ReadLineAsync());
-                    }
-                }
+                await writer.WriteLineAsync(JsonSerializer.Serialize(data));
             }
-
-            return resultFileName;
+            else
+            {
+                await writer.WriteLineAsync($"{data.SerialNumber}. {data.CompanyName}");
+            }
         }
 
         private string MergeSortedFilesParallel(string path1, string path2)
