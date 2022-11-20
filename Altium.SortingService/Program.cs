@@ -15,7 +15,7 @@ while (true)
     {
         fileName = path.Split("/").Last();
         path = path.Substring(0, path.Length - fileName.Length);
-        splittingService = new SplittingService(path, fileName, 5000000); // 5M -> 390 MB
+        splittingService = new SplittingService(path, fileName, 2500000); // 5M -> 390 MB
         break;
     }
     catch (Exception _)

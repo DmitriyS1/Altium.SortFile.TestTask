@@ -1,6 +1,5 @@
 ﻿using Altium.SortingService.Models;
 using System.Collections.Concurrent;
-using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Altium.SortingService.Services
@@ -41,7 +40,7 @@ namespace Altium.SortingService.Services
             return resultName;
         }
 
-        public string MergeParallel(ConcurrentQueue<string> filesToMerge, string fileName)
+        public string MergeInParallel(ConcurrentQueue<string> filesToMerge, string fileName)
         {
             while(filesToMerge.Count > 2)
             {
@@ -79,9 +78,6 @@ namespace Altium.SortingService.Services
 
         private async Task<string> MergeSortedFiles(string path1, string path2)
         {
-            var number1 = path1.Split('/').Last().Split('.')[0].Split('-').Last(); // sorted-0
-            var number2 = path2.Split('/').Last().Split('.')[0].Split('-').Last(); // sorted-1
-
             using var firstFileStream = File.OpenText(path1);
             using var secondFileStream = File.OpenText(path2);
 
