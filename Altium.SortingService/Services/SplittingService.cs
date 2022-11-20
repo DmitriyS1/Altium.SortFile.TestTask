@@ -37,7 +37,7 @@ namespace Altium.SortingService.Services
             var linesBatch = new List<Line>(10000);
             while (!stream.EndOfStream)
             {
-                if (counter == 100000)
+                if (counter == 1000000)
                 {
                     await linesBatch.WriteAndSerialize(currentFileNumber++, UNSORTED, FILE_DIRECTORY);
                     counter = 0;

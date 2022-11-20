@@ -16,5 +16,10 @@ namespace Altium.SortingService.Utils
         {
             await File.WriteAllLinesAsync($"{directory}/{sorted}-{fileNumber}.json", lines.Select(x => JsonSerializer.Serialize(x)));
         }
+
+        public static void WriteAndSerializeParallel(this IEnumerable<Line> lines, int fileNumber, string sorted, string directory)
+        {
+            File.WriteAllLines($"{directory}/{sorted}-{fileNumber}.json", lines.Select(x => JsonSerializer.Serialize(x)));
+        }
     }
 }
