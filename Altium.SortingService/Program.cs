@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Altium.SortingService.Services;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 SplittingService splittingService;
@@ -33,6 +34,12 @@ for (var i = 0; i < countOfSplittedFiles; i++)
 {
     sortedFiles.Enqueue($"sorted-{i}.txt");
 }
+
+//var sortedFiles = new ConcurrentQueue<string>();
+//for (var i = 0; i < countOfSplittedFiles; i++)
+//{
+//    sortedFiles.Enqueue($"sorted-{i}.txt");
+//}
 
 // Mesuring Merging operation
 var mergingService = new MergingService(path);
