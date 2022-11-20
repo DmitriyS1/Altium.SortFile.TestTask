@@ -85,7 +85,7 @@ namespace Altium.SortingService.Services
             using var firstFileStream = File.OpenText(path1);
             using var secondFileStream = File.OpenText(path2);
 
-            var resultFileName = $"merged-{number1}{number2}.json";
+            var resultFileName = $"merged-{Guid.NewGuid()}.txt";
             using var resultFile = new StreamWriter($"{_directory}{resultFileName}");
 
             var currentLine1 = JsonSerializer.Deserialize<Line>(await firstFileStream.ReadLineAsync());
@@ -158,7 +158,7 @@ namespace Altium.SortingService.Services
             using var firstFileStream = File.OpenText(path1);
             using var secondFileStream = File.OpenText(path2);
 
-            var resultFileName = $"merged-{number1}{number2}.json";
+            var resultFileName = $"merged-{Guid.NewGuid()}.txt";
             using var resultFile = new StreamWriter($"{_directory}{resultFileName}");
 
             var currentLine1 = JsonSerializer.Deserialize<Line>(firstFileStream.ReadLine());

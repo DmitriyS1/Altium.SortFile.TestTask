@@ -6,10 +6,21 @@ namespace Altium.SortingService.Services
 {
     public class SplittingService
     {
-        private readonly string FILE_DIRECTORY; // = "../../../../Altium.FileGenerator/bin/Debug/net6.0";
+        private readonly string _directory;
         private string UNSORTED = "unsorted";
+        private readonly int _counter;
 
-        public SplittingService(string directory, string fileName)
+        /// <summary>
+        /// Creates instance of the SplittingService class
+        /// </summary>
+        /// <param name="directory">Directory where to find the file</param>
+        /// <param name="fileName">Name of the file</param>
+        /// <param name="counter">Count of lines in the files. Depends on available RAM</param>
+        /// <exception cref="Exception">Throws if file not found</exception>
+        public SplittingService(
+            string directory, 
+            string fileName,
+            int counter)
         {
             var isPathValid = File.Exists($"{directory}/{fileName}");
             if (!isPathValid)
@@ -18,7 +29,8 @@ namespace Altium.SortingService.Services
                 throw new Exception("FileNotFoundException");
             }
 
-            FILE_DIRECTORY = directory;
+            _directory = directory;
+            _counter = counter;
         }
 
         /// <summary>
@@ -28,27 +40,26 @@ namespace Altium.SortingService.Services
         /// <returns>Count of files</returns>
         public async Task<int> SplitFile(string fileName)
         {
-            // ToDo: Check for previous unsorted files
-            using var stream = File.OpenText($"{FILE_DIRECTORY}/{fileName}");
+            using var stream = File.OpenText($"{_directory}/{fileName}");
             stream.BaseStream.Position = 0;
 
             var counter = 0;
             var currentFileNumber = 0;
-            var linesBatch = new List<Line>(10000);
+            var linesBatch = new List<Line>(_counter);
             while (!stream.EndOfStream)
             {
-                if (counter == 1000000)
+                if (counter == _counter)
                 {
-                    await linesBatch.WriteAndSerialize(currentFileNumber++, UNSORTED, FILE_DIRECTORY);
+                    await linesBatch.WriteAndSerialize(currentFileNumber++, UNSORTED, _directory);
                     counter = 0;
                     linesBatch.Clear();
                 }
 
-                linesBatch.Add(ParseLine(stream.ReadLine()));
+                linesBatch.Add(ParseLine(await stream.ReadLineAsync()));
                 counter++;
             }
 
-            await linesBatch.WriteAndSerialize(currentFileNumber++, UNSORTED, FILE_DIRECTORY);
+            await linesBatch.WriteAndSerialize(currentFileNumber++, UNSORTED, _directory);
 
             return currentFileNumber;
         }

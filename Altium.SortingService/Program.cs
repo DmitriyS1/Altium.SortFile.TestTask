@@ -15,7 +15,7 @@ while (true)
     {
         fileName = path.Split("/").Last();
         path = path.Substring(0, path.Length - fileName.Length);
-        splittingService = new SplittingService(path, fileName);
+        splittingService = new SplittingService(path, fileName, 200000);
         break;
     }
     catch (Exception _)
@@ -47,8 +47,10 @@ tsSort.Hours, tsSort.Minutes, tsSort.Seconds, tsSort.Milliseconds);
 var mergingService = new MergingService(path);
 var stopwatchMerge = new Stopwatch();
 stopwatchMerge.Start();
+
 // var result = await mergingService.Merge(sortedFiles, fileName);
 var result = mergingService.MergeParallel(sortedFiles, fileName);
+
 stopwatchMerge.Stop();
 var tsMerge = stopwatchMerge.Elapsed;
 Console.WriteLine("Merging Elapsed Time is {0:00}:{1:00}:{2:00}.{3}",

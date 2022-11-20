@@ -25,7 +25,7 @@
             return $"{Directory.GetCurrentDirectory()}/{fileName}";
         }
 
-        private List<string> UploadNames(int? count = null)
+        private List<string> UploadNames(int? count = 100)
         {
             var names = new List<string>();
             using var nasdaqFile = File.OpenText("nasdaq_screener.csv");

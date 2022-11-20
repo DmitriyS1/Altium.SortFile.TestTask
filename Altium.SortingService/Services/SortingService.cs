@@ -21,9 +21,9 @@ namespace Altium.SortingService.Services
             var files = new Queue<string>();
             for (int i = 0; i < _countOfFiles; i++)
             {
-                var filename = $"sorted-{i}.json";
+                var filename = $"sorted-{i}.txt";
 
-                var unsortedFilePath = $"{_directory}/unsorted-{i}.json";
+                var unsortedFilePath = $"{_directory}/unsorted-{i}.txt";
                 var sortedArray = await SortFile(unsortedFilePath);
                 await sortedArray.WriteAndSerialize(i, "sorted", _directory);
                 File.Delete(unsortedFilePath);
@@ -57,9 +57,9 @@ namespace Altium.SortingService.Services
             var files = new ConcurrentQueue<string>();
             Parallel.For(0, _countOfFiles, (i) =>
             {
-                var filename = $"sorted-{i}.json";
+                var filename = $"sorted-{i}.txt";
 
-                var unsortedFilePath = $"{_directory}/unsorted-{i}.json";
+                var unsortedFilePath = $"{_directory}/unsorted-{i}.txt";
                 var sortedArray = SortFileParallel(unsortedFilePath);
                 sortedArray.WriteAndSerializeParallel(i, "sorted", _directory);
                 File.Delete(unsortedFilePath);
