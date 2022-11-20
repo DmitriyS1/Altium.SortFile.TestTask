@@ -43,33 +43,36 @@ namespace Altium.SortingService.Services
 
         public string MergeParallel(ConcurrentQueue<string> filesToMerge, string fileName)
         {
-            
-            var resultName = "";
-            Parallel.For(0, filesToMerge.Count / 2 - 2, (i) =>
+            while(filesToMerge.Count > 2)
             {
-                var isFirstSuccess = filesToMerge.TryDequeue(out var firstName);
-                var isSecondSuccess = filesToMerge.TryDequeue(out var secondName);
-            });
-            //while (filesToMerge.Count > 2)
-            //{
-            //    var firstName = $"{_directory}{filesToMerge.Dequeue()}";
-            //    var secondName = $"{_directory}{filesToMerge.Dequeue()}";
+                Parallel.For(0, filesToMerge.Count / 2, (i) =>
+                {
+                    var isFirstSuccess = filesToMerge.TryDequeue(out var firstName);
+                    var isSecondSuccess = filesToMerge.TryDequeue(out var secondName);
 
-            //    resultName = MergeSortedFilesParallel(firstName, secondName);
+                    var firstPath = $"{_directory}{firstName}";
+                    var secondPath = $"{_directory}{secondName}";
 
-            //    File.Delete(firstName);
-            //    File.Delete(secondName);
+                    var resultName = MergeSortedFilesParallel(firstPath, secondPath);
 
-            //    filesToMerge.Enqueue(resultName);
-            //}
+                    File.Delete(firstPath);
+                    File.Delete(secondPath);
 
-            //var firstName1 = $"{_directory}{filesToMerge.Dequeue()}";
-            //var secondName1 = $"{_directory}{filesToMerge.Dequeue()}";
+                    filesToMerge.Enqueue(resultName);
+                });
 
-            //resultName = await FinalMerge(firstName1, secondName1, fileName);
+            }
 
-            //File.Delete(firstName1);
-            //File.Delete(secondName1);
+            var isFirstSuccess = filesToMerge.TryDequeue(out var firstName);
+            var isSecondSuccess = filesToMerge.TryDequeue(out var secondName);
+
+            var finalPath1 = $"{_directory}{firstName}";
+            var finalPath2 = $"{_directory}{secondName}";
+
+            var resultName = FinalMergeParallel(finalPath1, finalPath2, fileName);
+            
+            File.Delete(finalPath1);
+            File.Delete(finalPath2);
 
             return resultName;
         }
