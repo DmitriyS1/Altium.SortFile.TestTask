@@ -4,6 +4,9 @@ using System.Text.Json;
 
 namespace Altium.SortingService.Services
 {
+    /// <summary>
+    /// Class to merge files into one
+    /// </summary>
     public class MergingService
     {
         private readonly string _directory;
@@ -13,6 +16,12 @@ namespace Altium.SortingService.Services
             _directory = directory;
         }
 
+        /// <summary>
+        /// Merges bunch of files into one
+        /// </summary>
+        /// <param name="filesToMerge">File names</param>
+        /// <param name="fileName">Name of the file to sort</param>
+        /// <returns>Name of the sorted file</returns>
         public async Task<string> Merge(Queue<string> filesToMerge, string fileName)
         {
             var resultName = "";
@@ -40,6 +49,12 @@ namespace Altium.SortingService.Services
             return resultName;
         }
 
+        /// <summary>
+        /// Merges bunch of files into one
+        /// </summary>
+        /// <param name="filesToMerge">File names</param>
+        /// <param name="fileName">Name of the file to sort</param>
+        /// <returns>Name of the sorted file</returns>
         public string MergeInParallel(ConcurrentQueue<string> filesToMerge, string fileName)
         {
             while(filesToMerge.Count > 2)
@@ -110,7 +125,7 @@ namespace Altium.SortingService.Services
             return resultFileName;
         }
 
-        public async Task WriteData(StreamWriter writer, Line data, bool isJson)
+        private async Task WriteData(StreamWriter writer, Line data, bool isJson)
         {
             if (isJson)
             {

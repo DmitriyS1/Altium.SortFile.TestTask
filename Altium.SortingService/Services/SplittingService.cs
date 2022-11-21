@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Altium.SortingService.Services
 {
+    /// <summary>
+    /// Service to split big file into chunks
+    /// </summary>
     public class SplittingService
     {
         private readonly string _directory;
